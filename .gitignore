@@ -1,0 +1,7 @@
+main.tf
+/vendor
+terraform-provider-algolia
+*.tfstate
+*.backup
+*.log
+/.terraform

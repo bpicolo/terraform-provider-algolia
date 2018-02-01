@@ -1,0 +1,10 @@
+package: .
+import:
+- package: github.com/hashicorp/terraform
+  version: ^0.11.2
+  subpackages:
+  - helper/schema
+- package: github.com/algolia/algoliasearch-client-go
+  version: ^2.21.1
+  subpackages:
+  - algoliasearch
