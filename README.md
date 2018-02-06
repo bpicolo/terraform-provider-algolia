@@ -1,11 +1,7 @@
 # terraform-provider-algolia
-This is an in-progress custom terraform provider for Algolia service objects.
+This is an in-progress terraform provider for various Algolia resources.
 
-[In Progress] Indices
-
-[] Api Keys
-
-[] Query Rules?
-
-[] Vault
-
+- [X] Indices (In progress)
+- [ ] Api Keys
+- [ ] Query Rules?
+- [ ] Vault
