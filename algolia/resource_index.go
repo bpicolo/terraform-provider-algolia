@@ -265,40 +265,40 @@ func buildSettingsFromResourceData(d *schema.ResourceData) algoliasearch.Setting
 	}
 
 	settings := algoliasearch.Settings{
-		// PaginationLimitedTo:              d.Get("pagination_limited_to").(int), Missing from client
-		// RestrictHighlightAndSnippetArrays: d.Get("restrict_highlight_and_snippet_arrays").(bool),  Missing from client
-		AdvancedSyntax:                   d.Get("advanced_syntax").(bool),
-		AllowCompressionOfIntegerArray:   d.Get("allow_compression_of_integer_array").(bool),
-		AllowTyposOnNumericTokens:        d.Get("allow_typos_on_numeric_tokens").(bool),
-		AttributeForDistinct:             d.Get("attribute_for_distinct").(string),
-		AttributesForFaceting:            castStringList(d.Get("attributes_for_faceting").([]interface{})),
-		AttributesToHighlight:            castStringList(d.Get("attributes_to_highlight").([]interface{})),
-		AttributesToRetrieve:             castStringList(d.Get("attributes_to_retrieve").([]interface{})),
-		AttributesToSnippet:              castStringList(d.Get("attributes_to_snippet").([]interface{})),
-		CustomRanking:                    castStringList(d.Get("custom_ranking").([]interface{})),
-		DisableTypoToleranceOnAttributes: castStringList(d.Get("disable_typo_tolerance_on_attributes").([]interface{})),
-		DisableTypoToleranceOnWords:      castStringList(d.Get("disable_typo_tolerance_on_words").([]interface{})),
-		HighlightPostTag:                 d.Get("highlight_post_tag").(string),
-		HighlightPreTag:                  d.Get("highlight_pre_tag").(string),
-		HitsPerPage:                      d.Get("hits_per_page").(int),
-		MaxFacetHits:                     d.Get("max_facet_hits").(int),
-		MaxValuesPerFacet:                d.Get("max_values_per_facet").(int),
-		MinProximity:                     d.Get("min_proximity").(int),
-		MinWordSizefor1Typo:              d.Get("min_word_size_for_1_typo").(int),
-		MinWordSizefor2Typos:             d.Get("min_word_size_for_2_typos").(int),
-		OptionalWords:                    castStringList(d.Get("optional_words").([]interface{})),
-		QueryType:                        d.Get("query_type").(string),
-		Ranking:                          ranking,
-		RemoveWordsIfNoResults:           d.Get("remove_words_if_no_results").(string),
-		ReplaceSynonymsInHighlight:       d.Get("replace_synonyms_in_highlight").(bool),
-		Replicas:                         castStringList(d.Get("replicas").([]interface{})),
-		ResponseFields:                   castStringList(d.Get("response_fields").([]interface{})),
-		SearchableAttributes:             castStringList(d.Get("searchable_attributes").([]interface{})),
-		SeparatorsToIndex:                d.Get("separators_to_index").(string),
-		SnippetEllipsisText:              d.Get("snippet_ellipsis_text").(string),
-		SortFacetValuesBy:                d.Get("sort_facet_values_by").(string),
-		TypoTolerance:                    d.Get("typo_tolerance").(string),
-		UnretrievableAttributes:          castStringList(d.Get("unretrievable_attributes").([]interface{})),
+		AdvancedSyntax:                    d.Get("advanced_syntax").(bool),
+		AllowCompressionOfIntegerArray:    d.Get("allow_compression_of_integer_array").(bool),
+		AllowTyposOnNumericTokens:         d.Get("allow_typos_on_numeric_tokens").(bool),
+		AttributeForDistinct:              d.Get("attribute_for_distinct").(string),
+		AttributesForFaceting:             castStringList(d.Get("attributes_for_faceting").([]interface{})),
+		AttributesToHighlight:             castStringList(d.Get("attributes_to_highlight").([]interface{})),
+		AttributesToRetrieve:              castStringList(d.Get("attributes_to_retrieve").([]interface{})),
+		AttributesToSnippet:               castStringList(d.Get("attributes_to_snippet").([]interface{})),
+		CustomRanking:                     castStringList(d.Get("custom_ranking").([]interface{})),
+		DisableTypoToleranceOnAttributes:  castStringList(d.Get("disable_typo_tolerance_on_attributes").([]interface{})),
+		DisableTypoToleranceOnWords:       castStringList(d.Get("disable_typo_tolerance_on_words").([]interface{})),
+		HighlightPostTag:                  d.Get("highlight_post_tag").(string),
+		HighlightPreTag:                   d.Get("highlight_pre_tag").(string),
+		HitsPerPage:                       d.Get("hits_per_page").(int),
+		MaxFacetHits:                      d.Get("max_facet_hits").(int),
+		MaxValuesPerFacet:                 d.Get("max_values_per_facet").(int),
+		MinProximity:                      d.Get("min_proximity").(int),
+		MinWordSizefor1Typo:               d.Get("min_word_size_for_1_typo").(int),
+		MinWordSizefor2Typos:              d.Get("min_word_size_for_2_typos").(int),
+		PaginationLimitedTo:               d.Get("pagination_limited_to").(int),
+		OptionalWords:                     castStringList(d.Get("optional_words").([]interface{})),
+		QueryType:                         d.Get("query_type").(string),
+		Ranking:                           ranking,
+		RemoveWordsIfNoResults:            d.Get("remove_words_if_no_results").(string),
+		ReplaceSynonymsInHighlight:        d.Get("replace_synonyms_in_highlight").(bool),
+		Replicas:                          castStringList(d.Get("replicas").([]interface{})),
+		ResponseFields:                    castStringList(d.Get("response_fields").([]interface{})),
+		RestrictHighlightAndSnippetArrays: d.Get("restrict_highlight_and_snippet_arrays").(bool),
+		SearchableAttributes:              castStringList(d.Get("searchable_attributes").([]interface{})),
+		SeparatorsToIndex:                 d.Get("separators_to_index").(string),
+		SnippetEllipsisText:               d.Get("snippet_ellipsis_text").(string),
+		SortFacetValuesBy:                 d.Get("sort_facet_values_by").(string),
+		TypoTolerance:                     d.Get("typo_tolerance").(string),
+		UnretrievableAttributes:           castStringList(d.Get("unretrievable_attributes").([]interface{})),
 	}
 
 	return settings
@@ -330,12 +330,14 @@ func readResourceFromSettings(d *schema.ResourceData, s algoliasearch.Settings) 
 	d.Set("min_word_size_for_1_typo", s.MinWordSizefor1Typo)
 	d.Set("min_word_size_for_2_typos", s.MinWordSizefor2Typos)
 	d.Set("optional_words", s.OptionalWords)
+	d.Set("pagination_limited_to", s.PaginationLimitedTo)
 	d.Set("query_type", s.QueryType)
 	d.Set("ranking", ranking)
 	d.Set("remove_words_if_no_results", s.RemoveWordsIfNoResults)
 	d.Set("replace_synonyms_in_highlight", s.ReplaceSynonymsInHighlight)
 	d.Set("replicas", s.Replicas)
 	d.Set("response_fields", s.ResponseFields)
+	d.Set("restrict_highlight_and_snippet_arrays", s.RestrictHighlightAndSnippetArrays)
 	d.Set("searchable_attributes", s.SearchableAttributes)
 	d.Set("separators_to_index", s.SeparatorsToIndex)
 	d.Set("snippet_ellipsis_text", s.SnippetEllipsisText)
@@ -357,8 +359,7 @@ func castStringList(configured []interface{}) []string {
 }
 
 // The client's default ToMap() removes empty array attributes, which isn't correct behavior
-// when we explicitly want to create empty settings.
-// It's also missing some pieces (like maxFacetHits)
+// when we explicitly want to create empty settings e.g. to clear out settings that are currently set.
 // Original: https://github.com/algolia/algoliasearch-client-go/blob/master/algoliasearch/types_settings.go#L81
 func settingsAsMap(s algoliasearch.Settings) algoliasearch.Map {
 	m := algoliasearch.Map{
