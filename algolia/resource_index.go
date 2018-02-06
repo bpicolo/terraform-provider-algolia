@@ -2,13 +2,14 @@ package algolia
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"reflect"
 
 	"github.com/algolia/algoliasearch-client-go/algoliasearch"
 	"github.com/hashicorp/terraform/helper/schema"
 )
+
+var rankingDefault = []string{"typo", "geo", "words", "filters", "proximity", "attribute", "exact", "custom"}
 
 func resourceIndex() *schema.Resource {
 	return &schema.Resource{
@@ -82,7 +83,7 @@ func resourceIndex() *schema.Resource {
 				Description:  "Maximum number of facet values returned for each facet.",
 				ValidateFunc: IntBetween(1, 1000),
 			},
-			"sort_facets_values_by": &schema.Schema{
+			"sort_facet_values_by": &schema.Schema{
 				Type:         schema.TypeString,
 				Default:      "count",
 				Optional:     true,
@@ -178,7 +179,7 @@ func resourceIndex() *schema.Resource {
 				Default:      10,
 				Optional:     true,
 				Description:  "Maximum number of facet hits to return during a search for facet values.",
-				ValidateFunc: IntGTE(1),
+				ValidateFunc: IntBetween(1, 100),
 			},
 			"typo_tolerance": &schema.Schema{
 				Type:         schema.TypeString,
@@ -256,6 +257,13 @@ func resourceIndex() *schema.Resource {
 }
 
 func buildSettingsFromResourceData(d *schema.ResourceData) algoliasearch.Settings {
+	ranking := castStringList(d.Get("ranking").([]interface{}))
+	// Normalize how defaults are handled on both ends, so that terraform properly stores
+	// the status in tfstate.
+	if reflect.DeepEqual(ranking, rankingDefault) {
+		ranking = []string{}
+	}
+
 	settings := algoliasearch.Settings{
 		// PaginationLimitedTo:              d.Get("pagination_limited_to").(int), Missing from client
 		// RestrictHighlightAndSnippetArrays: d.Get("restrict_highlight_and_snippet_arrays").(bool),  Missing from client
@@ -280,7 +288,7 @@ func buildSettingsFromResourceData(d *schema.ResourceData) algoliasearch.Setting
 		MinWordSizefor2Typos:             d.Get("min_word_size_for_2_typos").(int),
 		OptionalWords:                    castStringList(d.Get("optional_words").([]interface{})),
 		QueryType:                        d.Get("query_type").(string),
-		Ranking:                          castStringList(d.Get("ranking").([]interface{})),
+		Ranking:                          ranking,
 		RemoveWordsIfNoResults:           d.Get("remove_words_if_no_results").(string),
 		ReplaceSynonymsInHighlight:       d.Get("replace_synonyms_in_highlight").(bool),
 		Replicas:                         castStringList(d.Get("replicas").([]interface{})),
@@ -288,7 +296,7 @@ func buildSettingsFromResourceData(d *schema.ResourceData) algoliasearch.Setting
 		SearchableAttributes:             castStringList(d.Get("searchable_attributes").([]interface{})),
 		SeparatorsToIndex:                d.Get("separators_to_index").(string),
 		SnippetEllipsisText:              d.Get("snippet_ellipsis_text").(string),
-		SortFacetValuesBy:                d.Get("sort_facets_values_by").(string),
+		SortFacetValuesBy:                d.Get("sort_facet_values_by").(string),
 		TypoTolerance:                    d.Get("typo_tolerance").(string),
 		UnretrievableAttributes:          castStringList(d.Get("unretrievable_attributes").([]interface{})),
 	}
@@ -297,6 +305,11 @@ func buildSettingsFromResourceData(d *schema.ResourceData) algoliasearch.Setting
 }
 
 func readResourceFromSettings(d *schema.ResourceData, s algoliasearch.Settings) {
+	ranking := s.Ranking
+	if reflect.DeepEqual(s.Ranking, rankingDefault) {
+		ranking = []string{}
+	}
+
 	d.Set("advanced_syntax", s.AdvancedSyntax)
 	d.Set("allow_compression_of_integer_array", s.AllowCompressionOfIntegerArray)
 	d.Set("allow_typos_on_numeric_tokens", s.AllowTyposOnNumericTokens)
@@ -318,7 +331,7 @@ func readResourceFromSettings(d *schema.ResourceData, s algoliasearch.Settings) 
 	d.Set("min_word_size_for_2_typos", s.MinWordSizefor2Typos)
 	d.Set("optional_words", s.OptionalWords)
 	d.Set("query_type", s.QueryType)
-	d.Set("ranking", s.Ranking)
+	d.Set("ranking", ranking)
 	d.Set("remove_words_if_no_results", s.RemoveWordsIfNoResults)
 	d.Set("replace_synonyms_in_highlight", s.ReplaceSynonymsInHighlight)
 	d.Set("replicas", s.Replicas)
@@ -344,9 +357,9 @@ func castStringList(configured []interface{}) []string {
 }
 
 // The client's default ToMap() removes empty array attributes, which isn't correct behavior
-// when we explicitly want to create empty settings. This is a 1:1 copy
-// of https://github.com/algolia/algoliasearch-client-go/blob/master/algoliasearch/types_settings.go#L81
-// minus that functionality
+// when we explicitly want to create empty settings.
+// It's also missing some pieces (like maxFacetHits)
+// Original: https://github.com/algolia/algoliasearch-client-go/blob/master/algoliasearch/types_settings.go#L81
 func settingsAsMap(s algoliasearch.Settings) algoliasearch.Map {
 	m := algoliasearch.Map{
 		// Indexing parameters
@@ -376,6 +389,7 @@ func settingsAsMap(s algoliasearch.Settings) algoliasearch.Map {
 		"highlightPostTag":           s.HighlightPostTag,
 		"highlightPreTag":            s.HighlightPreTag,
 		"hitsPerPage":                s.HitsPerPage,
+		"maxFacetHits":               s.MaxFacetHits,
 		"maxValuesPerFacet":          s.MaxValuesPerFacet,
 		"minProximity":               s.MinProximity,
 		"minWordSizefor1Typo":        s.MinWordSizefor1Typo,
@@ -475,7 +489,6 @@ func resourceIndexRead(d *schema.ResourceData, m interface{}) error {
 	}
 
 	readResourceFromSettings(d, settings)
-
 	return nil
 }
 
@@ -483,10 +496,7 @@ func resourceIndexUpdate(d *schema.ResourceData, m interface{}) error {
 	client := *m.(*algoliasearch.Client)
 	index := client.InitIndex(d.Id())
 	settings := buildSettingsFromResourceData(d)
-	resp, err := index.SetSettings(settingsAsMap(settings))
-	log.Printf("DEBUG: id: %v", d.Id())
-	log.Printf("DEBUG: %v", settings)
-	log.Printf("DEBUG: %v", resp)
+	_, err := index.SetSettings(settingsAsMap(settings))
 	if err != nil {
 		return fmt.Errorf("Error updating index %s: %v", d.Id(), err)
 	}

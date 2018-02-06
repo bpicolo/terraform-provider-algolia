@@ -5,4 +5,3 @@ This is an in-progress terraform provider for various Algolia resources.
 - [ ] Api Keys
 - [ ] Query Rules?
 - [ ] Vault
-
